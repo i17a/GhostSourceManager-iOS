@@ -1,0 +1,315 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		84D0B4B94257EA5FF5C924AF /* GhostSourceManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847558615D24C02A945C7762 /* GhostSourceManagerApp.swift */; };
+		8B80C1E1A2336448E00E19DB /* GhostTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB1A858666B4807C8804313 /* GhostTheme.swift */; };
+		86A6490DFE4EA3143EBD89C2 /* GitHubModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6FE3F0DEEBA080590E51C3 /* GitHubModels.swift */; };
+		E1234F0442A487E9DF20A31E /* SourceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51E36018EFE4525F4FBD8A57 /* SourceModels.swift */; };
+		46BF62A284B374F61A27FB6B /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FFA0FE6D6199220A592722 /* KeychainService.swift */; };
+		FD68385CC7115C76ABF1049E /* GitHubAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12BBD554A1EA3B57C3F88047 /* GitHubAPIService.swift */; };
+		CF0E951DDF539E749B64CAF2 /* IPAAnalyzerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000CE082F2BD0A6EA8B8773D /* IPAAnalyzerService.swift */; };
+		0BEA567529DB7AF177E30CD5 /* SourceManagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9097DE2A693B261BBADB098 /* SourceManagerViewModel.swift */; };
+		8D2790FBDB5BA968C365BD1F /* MainTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C7BB27FB53C7D6E24C5D90 /* MainTabContainerView.swift */; };
+		4D6E00AEDF016E3BD84DD62A /* TokenLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CBEEE03209D6DFC7DDDA1E9 /* TokenLoginView.swift */; };
+		7932EDAB817F951BAC5D44AD /* SourcesDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB262D762724F61C27A688E /* SourcesDashboardView.swift */; };
+		EF01D04B021D868F0A1DDB5E /* AddIPAPublishView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C3FFA92174CB4707F30D2F /* AddIPAPublishView.swift */; };
+		06F4AACAE665000E54C65B51 /* AppsListAndJSONView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72349A3513C486079C77058 /* AppsListAndJSONView.swift */; };
+		2A60867591542CF49B6AB0A0 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A516D9A685E514C3DA3136 /* ReportsView.swift */; };
+		BCDEA934D2501353B4C4CE9F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CFDBAC21689581B04CB7ABB5 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		847558615D24C02A945C7762 /* GhostSourceManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GhostSourceManagerApp.swift; path = GhostSourceManager/App/GhostSourceManagerApp.swift; sourceTree = SOURCE_ROOT; };
+		3DB1A858666B4807C8804313 /* GhostTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GhostTheme.swift; path = GhostSourceManager/Theme/GhostTheme.swift; sourceTree = SOURCE_ROOT; };
+		8B6FE3F0DEEBA080590E51C3 /* GitHubModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GitHubModels.swift; path = GhostSourceManager/Models/GitHubModels.swift; sourceTree = SOURCE_ROOT; };
+		51E36018EFE4525F4FBD8A57 /* SourceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SourceModels.swift; path = GhostSourceManager/Models/SourceModels.swift; sourceTree = SOURCE_ROOT; };
+		57FFA0FE6D6199220A592722 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeychainService.swift; path = GhostSourceManager/Services/KeychainService.swift; sourceTree = SOURCE_ROOT; };
+		12BBD554A1EA3B57C3F88047 /* GitHubAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GitHubAPIService.swift; path = GhostSourceManager/Services/GitHubAPIService.swift; sourceTree = SOURCE_ROOT; };
+		000CE082F2BD0A6EA8B8773D /* IPAAnalyzerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IPAAnalyzerService.swift; path = GhostSourceManager/Services/IPAAnalyzerService.swift; sourceTree = SOURCE_ROOT; };
+		E9097DE2A693B261BBADB098 /* SourceManagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SourceManagerViewModel.swift; path = GhostSourceManager/ViewModels/SourceManagerViewModel.swift; sourceTree = SOURCE_ROOT; };
+		F2C7BB27FB53C7D6E24C5D90 /* MainTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MainTabContainerView.swift; path = GhostSourceManager/Views/MainTabContainerView.swift; sourceTree = SOURCE_ROOT; };
+		8CBEEE03209D6DFC7DDDA1E9 /* TokenLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TokenLoginView.swift; path = GhostSourceManager/Views/TokenLoginView.swift; sourceTree = SOURCE_ROOT; };
+		5FB262D762724F61C27A688E /* SourcesDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SourcesDashboardView.swift; path = GhostSourceManager/Views/SourcesDashboardView.swift; sourceTree = SOURCE_ROOT; };
+		28C3FFA92174CB4707F30D2F /* AddIPAPublishView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddIPAPublishView.swift; path = GhostSourceManager/Views/AddIPAPublishView.swift; sourceTree = SOURCE_ROOT; };
+		D72349A3513C486079C77058 /* AppsListAndJSONView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppsListAndJSONView.swift; path = GhostSourceManager/Views/AppsListAndJSONView.swift; sourceTree = SOURCE_ROOT; };
+		69A516D9A685E514C3DA3136 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReportsView.swift; path = GhostSourceManager/Views/ReportsView.swift; sourceTree = SOURCE_ROOT; };
+		CFDBAC21689581B04CB7ABB5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = GhostSourceManager/Resources/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		3FB6BD64A997C517BC11CC6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = GhostSourceManager/Info.plist; sourceTree = SOURCE_ROOT; };
+		A7012AF211B903FFD79C89F6 /* GhostSourceManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GhostSourceManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		ADCF10F76EBF2A74473E9DC4 = {
+			isa = PBXGroup;
+			children = (
+				42EBD1D731B754885FA86D58 /* GhostSourceManager */,
+				5151B46607EBC8890D8DFCC2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		42EBD1D731B754885FA86D58 /* GhostSourceManager */ = {
+			isa = PBXGroup;
+			children = (
+				15BFE27C865695E669500042 /* App */,
+				9EF11297E9E925F832914135 /* Theme */,
+				2D6A14534C69F1AED6C38D7F /* Models */,
+				F233F1D49331EE48D3F26F93 /* Services */,
+				EEBC0A77BCEC0F56BA3C6717 /* ViewModels */,
+				25742D9CE3D31F7ED0AC10B8 /* Views */,
+				CFDBAC21689581B04CB7ABB5 /* Assets.xcassets */,
+				3FB6BD64A997C517BC11CC6E /* Info.plist */,
+			);
+			name = GhostSourceManager;
+			sourceTree = "<group>";
+		};
+		5151B46607EBC8890D8DFCC2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A7012AF211B903FFD79C89F6 /* GhostSourceManager.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		15BFE27C865695E669500042 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				847558615D24C02A945C7762 /* GhostSourceManagerApp.swift */,
+			);
+			name = App;
+			sourceTree = "<group>";
+		};
+		9EF11297E9E925F832914135 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				3DB1A858666B4807C8804313 /* GhostTheme.swift */,
+			);
+			name = Theme;
+			sourceTree = "<group>";
+		};
+		2D6A14534C69F1AED6C38D7F /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				8B6FE3F0DEEBA080590E51C3 /* GitHubModels.swift */,
+				51E36018EFE4525F4FBD8A57 /* SourceModels.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		F233F1D49331EE48D3F26F93 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				57FFA0FE6D6199220A592722 /* KeychainService.swift */,
+				12BBD554A1EA3B57C3F88047 /* GitHubAPIService.swift */,
+				000CE082F2BD0A6EA8B8773D /* IPAAnalyzerService.swift */,
+			);
+			name = Services;
+			sourceTree = "<group>";
+		};
+		EEBC0A77BCEC0F56BA3C6717 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				E9097DE2A693B261BBADB098 /* SourceManagerViewModel.swift */,
+			);
+			name = ViewModels;
+			sourceTree = "<group>";
+		};
+		25742D9CE3D31F7ED0AC10B8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F2C7BB27FB53C7D6E24C5D90 /* MainTabContainerView.swift */,
+				8CBEEE03209D6DFC7DDDA1E9 /* TokenLoginView.swift */,
+				5FB262D762724F61C27A688E /* SourcesDashboardView.swift */,
+				28C3FFA92174CB4707F30D2F /* AddIPAPublishView.swift */,
+				D72349A3513C486079C77058 /* AppsListAndJSONView.swift */,
+				69A516D9A685E514C3DA3136 /* ReportsView.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D68D57EB5B5D92EC60C8DA84 /* GhostSourceManager */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D28A2B497FA98060CD1B56AC /* Build configuration list for PBXNativeTarget "GhostSourceManager" */;
+			buildPhases = (
+				1CDF2F71A52B082132B04DFF /* Sources */,
+				C02F1309AF4906C92F1EAD44 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GhostSourceManager;
+			productName = GhostSourceManager;
+			productReference = A7012AF211B903FFD79C89F6 /* GhostSourceManager.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B25CF16007ABAFF9D21D5A6C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = 3D29D9F3A882C4202964FB56 /* Build configuration list for PBXProject "GhostSourceManager" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ar;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				ar,
+				en,
+				Base,
+			);
+			mainGroup = ADCF10F76EBF2A74473E9DC4;
+			productRefGroup = 5151B46607EBC8890D8DFCC2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D68D57EB5B5D92EC60C8DA84 /* GhostSourceManager */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C02F1309AF4906C92F1EAD44 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCDEA934D2501353B4C4CE9F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1CDF2F71A52B082132B04DFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84D0B4B94257EA5FF5C924AF /* GhostSourceManagerApp.swift in Sources */,
+				8B80C1E1A2336448E00E19DB /* GhostTheme.swift in Sources */,
+				86A6490DFE4EA3143EBD89C2 /* GitHubModels.swift in Sources */,
+				E1234F0442A487E9DF20A31E /* SourceModels.swift in Sources */,
+				46BF62A284B374F61A27FB6B /* KeychainService.swift in Sources */,
+				FD68385CC7115C76ABF1049E /* GitHubAPIService.swift in Sources */,
+				CF0E951DDF539E749B64CAF2 /* IPAAnalyzerService.swift in Sources */,
+				0BEA567529DB7AF177E30CD5 /* SourceManagerViewModel.swift in Sources */,
+				8D2790FBDB5BA968C365BD1F /* MainTabContainerView.swift in Sources */,
+				4D6E00AEDF016E3BD84DD62A /* TokenLoginView.swift in Sources */,
+				7932EDAB817F951BAC5D44AD /* SourcesDashboardView.swift in Sources */,
+				EF01D04B021D868F0A1DDB5E /* AddIPAPublishView.swift in Sources */,
+				06F4AACAE665000E54C65B51 /* AppsListAndJSONView.swift in Sources */,
+				2A60867591542CF49B6AB0A0 /* ReportsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		6A7A9C00E9D82F8B527AF6B5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		01172647D9872636A9E33D38 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		0B3079DC2D291AADAA0B4EE8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = GhostSourceManager/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghostsource.manager;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8EAB03D3CF8F88DB93E6F3D1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = GhostSourceManager/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghostsource.manager;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3D29D9F3A882C4202964FB56 /* Build configuration list for PBXProject "GhostSourceManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6A7A9C00E9D82F8B527AF6B5 /* Debug */,
+				01172647D9872636A9E33D38 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D28A2B497FA98060CD1B56AC /* Build configuration list for PBXNativeTarget "GhostSourceManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0B3079DC2D291AADAA0B4EE8 /* Debug */,
+				8EAB03D3CF8F88DB93E6F3D1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B25CF16007ABAFF9D21D5A6C /* Project object */;
+}
