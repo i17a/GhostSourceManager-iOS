@@ -228,7 +228,7 @@ struct AddIPAPublishView: View {
                 .padding(10)
                 .background(Color.black.opacity(0.35))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .accessibilityIdentifier("ipaField.\(field.accessibilityKey)")
+                .accessibilityIdentifier("ipaField.\(accessibilityKey(for: field))")
         }
     }
 
@@ -369,11 +369,9 @@ struct AddIPAPublishView: View {
         }
         isPublishing = false
     }
-}
 
-private extension AddIPAPublishView.FormField {
-    var accessibilityKey: String {
-        switch self {
+    private func accessibilityKey(for field: FormField) -> String {
+        switch field {
         case .appName: return "appName"
         case .bundleID: return "bundleID"
         case .version: return "version"
