@@ -263,6 +263,6 @@ enum SourceManifestCoder {
         if let range = detail.range(of: #"line\s+(\d+),\s*column\s+(\d+)"#, options: .regularExpression) {
             return "\(detail[range]): \(detail)"
         }
-        return detail
+        return "السطر 1 (تعذّر تحديد الموضع بدقة): \(detail)"
     }
 }

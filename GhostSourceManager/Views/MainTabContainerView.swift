@@ -3,51 +3,33 @@ import UIKit
 
 struct MainTabContainerView: View {
     @EnvironmentObject private var vm: SourceManagerViewModel
-    @State private var keyboardVisible = false
 
     var body: some View {
-        ZStack {
-            GhostTheme.background.ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                if vm.selectedTab != .addIPA {
-                    topHeader
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                        .padding(.bottom, 10)
-                }
-
-                Group {
-                    switch vm.selectedTab {
-                    case .home, .sources:
-                        SourcesDashboardView()
-                    case .addIPA:
-                        AddIPAPublishView()
-                    case .apps:
-                        AppsListAndJSONView()
-                    case .reports:
-                        ReportsView()
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 0) {
+            if vm.selectedTab != .addIPA {
+                topHeader
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 10)
             }
 
+            Group {
+                switch vm.selectedTab {
+                case .home, .sources:
+                    SourcesDashboardView()
+                case .addIPA:
+                    AddIPAPublishView()
+                case .apps:
+                    AppsListAndJSONView()
+                case .reports:
+                    ReportsView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .background(GhostTheme.background.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !keyboardVisible {
-                customBottomBar
-                    .padding(.horizontal, 12)
-                    .padding(.top, 6)
-                    .padding(.bottom, 4)
-                    .background(GhostTheme.background)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-            withAnimation(.easeOut(duration: 0.18)) { keyboardVisible = true }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-            withAnimation(.easeOut(duration: 0.18)) { keyboardVisible = false }
+            customBottomBar
         }
         .sheet(isPresented: $vm.showLoginSheet) {
             TokenLoginView()
@@ -95,50 +77,58 @@ struct MainTabContainerView: View {
     }
 
     private var customBottomBar: some View {
-        HStack(alignment: .bottom, spacing: 0) {
+        HStack(spacing: 0) {
             tabItem(tab: .home, icon: "house", title: "الرئيسية")
             tabItem(tab: .sources, icon: "folder.fill", title: "المصادر")
-
-            Button {
-                vm.editingApp = nil
-                vm.selectedTab = .addIPA
-            } label: {
-                VStack(spacing: 4) {
-                    ZStack {
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [GhostTheme.violetGlow, Color(red: 0.25, green: 0.10, blue: 0.45)],
-                                    center: .center,
-                                    startRadius: 4,
-                                    endRadius: 30
-                                )
-                            )
-                            .frame(width: 56, height: 56)
-                            .overlay(Circle().stroke(GhostTheme.violetGlow, lineWidth: 1.5))
-                            .shadow(color: GhostTheme.violetGlow.opacity(0.65), radius: 14)
-
-                        Image(systemName: "plus")
-                            .font(.system(size: 26, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                    .offset(y: -14)
-
-                    Text("إضافة IPA")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(vm.selectedTab == .addIPA ? GhostTheme.gold : GhostTheme.textSecondary)
-                        .offset(y: -10)
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .accessibilityIdentifier("tab.addIPA")
-
+            addIPATab
             tabItem(tab: .apps, icon: "square.grid.2x2", title: "التطبيقات")
             tabItem(tab: .reports, icon: "chart.bar", title: "التقارير")
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
-        .ghostCard()
+        .frame(maxWidth: .infinity)
+        .frame(height: 64)
+        .background {
+            GhostTheme.cardTop
+                .overlay(alignment: .top) {
+                    Rectangle().fill(GhostTheme.violetGlow.opacity(0.45)).frame(height: 1)
+                }
+                .ignoresSafeArea(edges: .bottom)
+        }
+    }
+
+    private var addIPATab: some View {
+        Button {
+            vm.editingApp = nil
+            vm.selectedTab = .addIPA
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [GhostTheme.violetGlow, Color(red: 0.25, green: 0.10, blue: 0.45)],
+                            center: .center,
+                            startRadius: 4,
+                            endRadius: 28
+                        )
+                    )
+                    .frame(width: 56, height: 56)
+                    .overlay(Circle().stroke(GhostTheme.violetGlow, lineWidth: 1.5))
+                    .shadow(color: GhostTheme.violetGlow.opacity(0.55), radius: 10)
+                Image(systemName: "plus")
+                    .font(.system(size: 25, weight: .bold))
+                    .foregroundColor(.white)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 64)
+            .contentShape(Rectangle())
+            .overlay(alignment: .bottom) {
+                Capsule()
+                    .fill(vm.selectedTab == .addIPA ? GhostTheme.gold : .clear)
+                    .frame(width: 22, height: 2)
+                    .padding(.bottom, 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("tab.addIPA")
     }
 
     private func tabItem(tab: MainTab, icon: String, title: String) -> some View {
@@ -146,18 +136,23 @@ struct MainTabContainerView: View {
         return Button {
             vm.selectedTab = tab
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: 3) {
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .semibold))
                 Text(title)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: 9, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Capsule()
                     .fill(isSelected ? GhostTheme.gold : .clear)
-                    .frame(width: 24, height: 2.5)
+                    .frame(width: 22, height: 2)
             }
             .foregroundColor(isSelected ? GhostTheme.gold : GhostTheme.textSecondary)
             .frame(maxWidth: .infinity)
+            .frame(height: 64)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .accessibilityIdentifier("tab.\(tab.accessibilityKey)")
     }
 }

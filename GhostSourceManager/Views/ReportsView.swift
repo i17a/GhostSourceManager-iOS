@@ -41,7 +41,7 @@ struct ReportsView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.bottom, 115)
+            .padding(.bottom, 16)
         }
     }
 }

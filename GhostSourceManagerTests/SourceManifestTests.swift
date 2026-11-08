@@ -52,6 +52,7 @@ final class SourceManifestTests: XCTestCase {
             let message = error.localizedDescription
             XCTAssertTrue(message.contains("JSON"))
             XCTAssertGreaterThan(message.count, 20)
+            XCTAssertTrue(message.contains("السطر"), "Malformed JSON diagnostics should include a line number")
         }
     }
 }

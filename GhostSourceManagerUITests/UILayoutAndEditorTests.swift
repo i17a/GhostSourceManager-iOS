@@ -21,12 +21,15 @@ final class UILayoutAndEditorTests: XCTestCase {
 
         let validateButton = app.buttons["validateJSON"]
         let saveButton = app.buttons["saveJSON"]
-        let hideKeyboardButton = app.buttons["hideJSONKeyboard"]
+        let doneButton = app.buttons["doneJSONKeyboard"]
         XCTAssertTrue(validateButton.isHittable, "Validation must remain reachable above the keyboard")
         XCTAssertTrue(saveButton.isHittable, "Save must remain reachable above the keyboard")
-        XCTAssertTrue(hideKeyboardButton.isHittable, "The editor must provide an explicit keyboard-dismiss control")
+        XCTAssertTrue(doneButton.isHittable, "The keyboard must show a Done control")
+        for identifier in ["formatJSON", "validateJSON", "copyJSON", "pasteJSON", "undoJSON"] {
+            XCTAssertTrue(app.buttons[identifier].exists, "Missing JSON tool \(identifier)")
+        }
         validateButton.tap()
-        hideKeyboardButton.tap()
+        doneButton.tap()
         XCTAssertFalse(app.keyboards.firstMatch.waitForExistence(timeout: 3), "The explicit control should dismiss the keyboard")
 
         XCTAssertTrue(editor.exists, "Validation must not replace or discard the editor contents")

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct AppsListAndJSONView: View {
     @EnvironmentObject private var vm: SourceManagerViewModel
@@ -9,6 +10,7 @@ struct AppsListAndJSONView: View {
     @State private var appPendingDelete: SourceAppItem?
     @State private var isSavingJSON = false
     @FocusState private var isJSONEditorFocused: Bool
+    @Environment(\.undoManager) private var undoManager
 
     var body: some View {
         ScrollView {
@@ -38,7 +40,14 @@ struct AppsListAndJSONView: View {
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if showJSONEditor {
-                jsonEditorToolbar
+                jsonSaveBar
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("تم") { isJSONEditorFocused = false }
+                    .accessibilityIdentifier("doneJSONKeyboard")
             }
         }
         .confirmationDialog("تأكيد حذف التطبيق", isPresented: Binding(
@@ -127,8 +136,10 @@ struct AppsListAndJSONView: View {
 
     private var rawEditorSection: some View {
         VStack(alignment: .leading, spacing: 12) {
+            jsonEditorToolbar
+
             TextEditor(text: $draftJSON)
-                .font(.system(size: 12, design: .monospaced))
+                .font(.system(size: 13, design: .monospaced))
                 .environment(\.layoutDirection, .leftToRight)
                 .multilineTextAlignment(.leading)
                 .focused($isJSONEditorFocused)
@@ -136,15 +147,11 @@ struct AppsListAndJSONView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .accessibilityIdentifier("manifestJSONEditor")
-                .frame(minHeight: 340, maxHeight: 560)
+                .frame(height: 430)
                 .scrollContentBackground(.hidden)
                 .padding(8)
                 .background(Color.black.opacity(0.45))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
-
-            if let err = editorError {
-                Text(err).font(.system(size: 12)).foregroundColor(GhostTheme.danger)
-            }
 
         }
         .padding(16)
@@ -152,68 +159,96 @@ struct AppsListAndJSONView: View {
     }
 
     private var jsonEditorToolbar: some View {
-        VStack(spacing: 8) {
-            if isJSONEditorFocused {
-                HStack {
-                    Spacer()
-                    Button("إخفاء لوحة المفاتيح") {
-                        isJSONEditorFocused = false
-                    }
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(GhostTheme.textPrimary)
-                    .accessibilityIdentifier("hideJSONKeyboard")
-                }
+        HStack(spacing: 6) {
+            jsonTool("تنسيق", icon: "text.alignleft", id: "formatJSON") {
+                do {
+                    let parsed = try SourceManifestCoder.parse(jsonString: draftJSON)
+                    draftJSON = try SourceManifestCoder.serializePretty(parsed.rawRootObject)
+                    editorError = nil
+                } catch { editorError = error.localizedDescription }
             }
-            HStack {
-                Button("تنسيق والتحقق") {
-                    do {
-                        let parsed = try SourceManifestCoder.parse(jsonString: draftJSON)
-                        draftJSON = try SourceManifestCoder.serializePretty(parsed.rawRootObject)
-                        editorError = nil
-                    } catch {
-                        editorError = error.localizedDescription
-                    }
-                }
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(GhostTheme.gold)
-                .accessibilityIdentifier("validateJSON")
-
-                Spacer()
-
-                Button {
-                    guard !isSavingJSON else { return }
-                    Task {
-                        isSavingJSON = true
-                        defer { isSavingJSON = false }
-                        do {
-                            _ = try SourceManifestCoder.parse(jsonString: draftJSON)
-                            editorError = nil
-                            try await vm.saveRawJSON(draftJSON, commitMessage: commitMessage)
-                        } catch {
-                            editorError = error.localizedDescription
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        if isSavingJSON { ProgressView().tint(.black) }
-                        Text("حفظ في GitHub")
-                    }
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(GhostTheme.goldGradient)
-                    .clipShape(Capsule())
-                }
-                .disabled(isSavingJSON)
-                .accessibilityIdentifier("saveJSON")
+            jsonTool("تحقق", icon: "checkmark.circle", id: "validateJSON") {
+                do {
+                    _ = try SourceManifestCoder.parse(jsonString: draftJSON)
+                    editorError = nil
+                } catch { editorError = error.localizedDescription }
+            }
+            jsonTool("نسخ", icon: "doc.on.doc", id: "copyJSON") {
+                UIPasteboard.general.string = draftJSON
+            }
+            jsonTool("لصق", icon: "doc.on.clipboard", id: "pasteJSON") {
+                if let pasted = UIPasteboard.general.string { draftJSON += pasted }
+            }
+            jsonTool("تراجع", icon: "arrow.uturn.backward", id: "undoJSON") {
+                undoManager?.undo()
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(GhostTheme.cardTop)
-        .overlay(alignment: .top) {
-            Rectangle().fill(GhostTheme.violetGlow.opacity(0.45)).frame(height: 1)
-        }
+        .frame(maxWidth: .infinity)
+        .accessibilityIdentifier("jsonEditorToolbar")
     }
+
+    private func jsonTool(_ title: String, icon: String, id: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: icon).font(.system(size: 13, weight: .semibold))
+                Text(title).font(.system(size: 9, weight: .bold)).lineLimit(1).minimumScaleFactor(0.7)
+            }
+            .foregroundColor(GhostTheme.textPrimary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(GhostTheme.cardTop)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(GhostTheme.violetGlow.opacity(0.45), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(id)
+    }
+
+    private var jsonSaveBar: some View {
+        VStack(spacing: 8) {
+            if let err = editorError {
+                Text(err)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(GhostTheme.danger)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("jsonValidationError")
+            }
+            TextField("رسالة الحفظ إلى GitHub", text: $commitMessage)
+                .font(.system(size: 12))
+                .textInputAutocapitalization(.sentences)
+                .padding(10)
+                .background(Color.black.opacity(0.35))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .accessibilityIdentifier("jsonCommitMessage")
+
+            Button {
+                guard !isSavingJSON else { return }
+                Task {
+                    isSavingJSON = true
+                    defer { isSavingJSON = false }
+                    do {
+                        _ = try SourceManifestCoder.parse(jsonString: draftJSON)
+                        editorError = nil
+                        try await vm.saveRawJSON(draftJSON, commitMessage: commitMessage)
+                    } catch { editorError = error.localizedDescription }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    if isSavingJSON { ProgressView().tint(.black) }
+                    Text("حفظ في GitHub").font(.system(size: 15, weight: .heavy))
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 13)
+                .background(GhostTheme.goldGradient)
+                .clipShape(Capsule())
+            }
+            .disabled(isSavingJSON)
+            .accessibilityIdentifier("saveJSON")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(GhostTheme.cardTop)
+    }
+}
 }
