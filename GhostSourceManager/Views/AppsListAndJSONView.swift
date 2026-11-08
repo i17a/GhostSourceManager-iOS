@@ -13,35 +13,47 @@ struct AppsListAndJSONView: View {
     @Environment(\.undoManager) private var undoManager
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                if let manifest = vm.manifest {
-                    sourceSummaryHeader(manifest)
+        VStack(spacing: 0) {
+            if let manifest = vm.manifest {
+                sourceSummaryHeader(manifest)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 2)
+                    .padding(.bottom, 8)
 
+                if showJSONEditor {
+                    jsonEditorToolbar
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 8)
+                }
+
+                ScrollView {
                     if showJSONEditor {
-                        rawEditorSection
+                        rawEditorContent
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 14)
                     } else {
-                        ForEach(manifest.apps) { app in
-                            appRow(app)
+                        VStack(spacing: 16) {
+                            ForEach(manifest.apps) { app in appRow(app) }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 14)
                     }
-                } else {
+                }
+                .scrollDismissesKeyboard(.interactively)
+            } else {
+                ScrollView {
                     Text("اختر مستودعاً وحمّل ملف السورس أولاً من تبويب المصادر.")
                         .font(.system(size: 13))
                         .foregroundColor(GhostTheme.textSecondary)
                         .padding(24)
                         .frame(maxWidth: .infinity)
                         .ghostCard()
+                        .padding(16)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 16)
         }
-        .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if showJSONEditor {
-                jsonSaveBar
-            }
+            if showJSONEditor, vm.manifest != nil { jsonSaveBar }
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
@@ -55,9 +67,7 @@ struct AppsListAndJSONView: View {
             set: { if !$0 { appPendingDelete = nil } }
         )) {
             Button("حذف وحفظ التعديل في GitHub", role: .destructive) {
-                if let target = appPendingDelete {
-                    Task { try? await vm.deleteApp(target) }
-                }
+                if let target = appPendingDelete { Task { try? await vm.deleteApp(target) } }
             }
             Button("إلغاء", role: .cancel) {}
         }
@@ -98,6 +108,7 @@ struct AppsListAndJSONView: View {
             .accessibilityIdentifier("mode.json")
             .onChange(of: showJSONEditor) { isJSON in
                 if isJSON { draftJSON = vm.rawJSONString }
+                else { isJSONEditorFocused = false }
             }
         }
         .padding(16)
@@ -124,9 +135,7 @@ struct AppsListAndJSONView: View {
             } label: {
                 Image(systemName: "pencil").foregroundColor(.white).padding(8)
             }
-            Button {
-                appPendingDelete = app
-            } label: {
+            Button { appPendingDelete = app } label: {
                 Image(systemName: "trash").foregroundColor(GhostTheme.danger).padding(8)
             }
         }
@@ -134,10 +143,8 @@ struct AppsListAndJSONView: View {
         .ghostCard()
     }
 
-    private var rawEditorSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            jsonEditorToolbar
-
+    private var rawEditorContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
             TextEditor(text: $draftJSON)
                 .font(.system(size: 13, design: .monospaced))
                 .environment(\.layoutDirection, .leftToRight)
@@ -153,6 +160,13 @@ struct AppsListAndJSONView: View {
                 .background(Color.black.opacity(0.45))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
 
+            if let err = editorError {
+                Text(err)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(GhostTheme.danger)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("jsonValidationError")
+            }
         }
         .padding(16)
         .ghostCard()
@@ -250,5 +264,4 @@ struct AppsListAndJSONView: View {
         .padding(.vertical, 8)
         .background(GhostTheme.cardTop)
     }
-}
 }
