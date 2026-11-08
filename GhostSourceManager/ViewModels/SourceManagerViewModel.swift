@@ -52,6 +52,17 @@ final class SourceManagerViewModel: ObservableObject {
     private let lastPathKey = "ghost_last_filepath"
 
     init() {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-manifest") {
+            let fixture = """
+            {"name":"UI Test Source","customRoot":"preserved","apps":[{"name":"Fixture App","bundleIdentifier":"test.fixture.app","version":"1.0","customAppField":42}]}
+            """
+            rawJSONString = fixture
+            currentFileSha = "ui-test-sha"
+            manifest = try? SourceManifestCoder.parse(jsonString: fixture)
+            return
+        }
+#endif
         if let savedToken = KeychainService.readToken(), !savedToken.isEmpty {
             Task {
                 await authenticate(with: savedToken, saveToKeychain: false)
@@ -222,6 +233,24 @@ final class SourceManagerViewModel: ObservableObject {
             throw GitHubServiceError.unauthorized
         }
         let parsed = try SourceManifestCoder.parse(jsonString: jsonText)
+        let expectedSHA = currentFileSha
+        do {
+            let latest = try await api.fetchFile(
+                token: token,
+                fullName: repo.fullName,
+                path: selectedFilePath,
+                branch: selectedBranch
+            )
+            guard latest.sha == expectedSHA else {
+                await loadSelectedSourceFile()
+                throw GitHubServiceError.shaConflict("تغيّر الملف على GitHub منذ تحميله. حُفظت مسودتك الحالية؛ راجع النسخة الأحدث قبل إعادة المحاولة.")
+            }
+        } catch GitHubServiceError.notFound {
+            guard expectedSHA == nil else {
+                await loadSelectedSourceFile()
+                throw GitHubServiceError.shaConflict("لم يعد الملف الموجود سابقاً موجوداً على GitHub. حُفظت مسودتك الحالية للمراجعة.")
+            }
+        }
         do {
             let res = try await api.putFile(
                 token: token,
@@ -230,7 +259,7 @@ final class SourceManagerViewModel: ObservableObject {
                 branch: selectedBranch,
                 data: Data(jsonText.utf8),
                 message: commitMessage,
-                sha: currentFileSha
+                sha: expectedSHA
             )
             currentFileSha = res.newSha
             rawJSONString = jsonText

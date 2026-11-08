@@ -1,10 +1,12 @@
 import SwiftUI
+import UIKit
 
 struct MainTabContainerView: View {
     @EnvironmentObject private var vm: SourceManagerViewModel
+    @State private var keyboardVisible = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             GhostTheme.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -30,9 +32,22 @@ struct MainTabContainerView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
-            customBottomBar
-                .padding(.horizontal, 12)
-                .padding(.bottom, 6)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !keyboardVisible {
+                customBottomBar
+                    .padding(.horizontal, 12)
+                    .padding(.top, 6)
+                    .padding(.bottom, 4)
+                    .background(GhostTheme.background)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.18)) { keyboardVisible = true }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.18)) { keyboardVisible = false }
         }
         .sheet(isPresented: $vm.showLoginSheet) {
             TokenLoginView()
@@ -116,6 +131,7 @@ struct MainTabContainerView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            .accessibilityIdentifier("tab.addIPA")
 
             tabItem(tab: .apps, icon: "square.grid.2x2", title: "التطبيقات")
             tabItem(tab: .reports, icon: "chart.bar", title: "التقارير")
@@ -141,6 +157,19 @@ struct MainTabContainerView: View {
             }
             .foregroundColor(isSelected ? GhostTheme.gold : GhostTheme.textSecondary)
             .frame(maxWidth: .infinity)
+        }
+        .accessibilityIdentifier("tab.\(tab.accessibilityKey)")
+    }
+}
+
+private extension MainTab {
+    var accessibilityKey: String {
+        switch self {
+        case .home: return "home"
+        case .sources: return "sources"
+        case .addIPA: return "addIPA"
+        case .apps: return "apps"
+        case .reports: return "reports"
         }
     }
 }

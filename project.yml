@@ -39,3 +39,15 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+
+  GhostSourceManagerUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: GhostSourceManagerUITests
+    dependencies:
+      - target: GhostSourceManager
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES

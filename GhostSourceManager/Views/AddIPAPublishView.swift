@@ -3,6 +3,11 @@ import UniformTypeIdentifiers
 
 struct AddIPAPublishView: View {
     @EnvironmentObject private var vm: SourceManagerViewModel
+    @FocusState private var focusedField: FormField?
+
+    private enum FormField: Hashable {
+        case appName, bundleID, version, buildVersion, developer, description, releaseTag, downloadURL
+    }
 
     @State private var showFileImporter = false
     @State private var analyzedIPA: AnalyzedIPA?
@@ -39,7 +44,22 @@ struct AddIPAPublishView: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
-            .padding(.bottom, 115)
+            .padding(.bottom, 16)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if focusedField != nil {
+                HStack {
+                    Spacer()
+                    Button("إخفاء لوحة المفاتيح") { focusedField = nil }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(GhostTheme.textPrimary)
+                        .accessibilityIdentifier("hideFormKeyboard")
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(GhostTheme.cardTop)
+            }
         }
         .onAppear(perform: populateFromEditingApp)
         .fileImporter(
@@ -177,36 +197,38 @@ struct AddIPAPublishView: View {
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.white)
 
-            labeledField("اسم التطبيق", text: $appName, ltr: true)
-            labeledField("معرف الحزمة", text: $bundleID, ltr: true)
+            labeledField("اسم التطبيق", text: $appName, ltr: true, field: .appName)
+            labeledField("معرف الحزمة", text: $bundleID, ltr: true, field: .bundleID)
             HStack(spacing: 10) {
-                labeledField("الإصدار", text: $version, ltr: true)
-                labeledField("البناء", text: $buildVersion, ltr: true)
+                labeledField("الإصدار", text: $version, ltr: true, field: .version)
+                labeledField("البناء", text: $buildVersion, ltr: true, field: .buildVersion)
             }
-            labeledField("المطور", text: $developerName, ltr: false)
-            labeledField("الوصف", text: $localizedDescription, ltr: false)
+            labeledField("المطور", text: $developerName, ltr: false, field: .developer)
+            labeledField("الوصف", text: $localizedDescription, ltr: false, field: .description)
             if uploadToRelease {
-                labeledField("وسم Release", text: $releaseTag, ltr: true)
+                labeledField("وسم Release", text: $releaseTag, ltr: true, field: .releaseTag)
             } else {
-                labeledField("رابط التنزيل", text: $manualDownloadURL, ltr: true)
+                labeledField("رابط التنزيل", text: $manualDownloadURL, ltr: true, field: .downloadURL)
             }
         }
         .padding(16)
         .ghostCard()
     }
 
-    private func labeledField(_ label: String, text: Binding<String>, ltr: Bool) -> some View {
+    private func labeledField(_ label: String, text: Binding<String>, ltr: Bool, field: FormField) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(GhostTheme.textSecondary)
             TextField(label, text: text)
                 .font(.system(size: 13))
+                .focused($focusedField, equals: field)
                 .environment(\.layoutDirection, ltr ? .leftToRight : .rightToLeft)
                 .foregroundColor(.white)
                 .padding(10)
                 .background(Color.black.opacity(0.35))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
+                .accessibilityIdentifier("ipaField.\(field.accessibilityKey)")
         }
     }
 
@@ -277,6 +299,7 @@ struct AddIPAPublishView: View {
                 .clipShape(Capsule())
             }
             .disabled(isPublishing)
+            .accessibilityIdentifier("publishIPA")
 
             Button("إلغاء") {
                 analyzedIPA = nil
@@ -345,5 +368,20 @@ struct AddIPAPublishView: View {
             publishError = error.localizedDescription
         }
         isPublishing = false
+    }
+}
+
+private extension AddIPAPublishView.FormField {
+    var accessibilityKey: String {
+        switch self {
+        case .appName: return "appName"
+        case .bundleID: return "bundleID"
+        case .version: return "version"
+        case .buildVersion: return "buildVersion"
+        case .developer: return "developer"
+        case .description: return "description"
+        case .releaseTag: return "releaseTag"
+        case .downloadURL: return "downloadURL"
+        }
     }
 }

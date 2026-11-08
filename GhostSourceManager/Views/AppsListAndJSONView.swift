@@ -7,6 +7,8 @@ struct AppsListAndJSONView: View {
     @State private var commitMessage = "Update source manifest via Ghost Source Manager"
     @State private var editorError: String?
     @State private var appPendingDelete: SourceAppItem?
+    @State private var isSavingJSON = false
+    @FocusState private var isJSONEditorFocused: Bool
 
     var body: some View {
         ScrollView {
@@ -31,7 +33,13 @@ struct AppsListAndJSONView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.bottom, 115)
+            .padding(.bottom, 16)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if showJSONEditor {
+                jsonEditorToolbar
+            }
         }
         .confirmationDialog("تأكيد حذف التطبيق", isPresented: Binding(
             get: { appPendingDelete != nil },
@@ -78,6 +86,7 @@ struct AppsListAndJSONView: View {
                 Text("محرر JSON الكامل").tag(true)
             }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier("mode.json")
             .onChange(of: showJSONEditor) { isJSON in
                 if isJSON { draftJSON = vm.rawJSONString }
             }
@@ -121,7 +130,13 @@ struct AppsListAndJSONView: View {
             TextEditor(text: $draftJSON)
                 .font(.system(size: 12, design: .monospaced))
                 .environment(\.layoutDirection, .leftToRight)
-                .frame(minHeight: 260)
+                .multilineTextAlignment(.leading)
+                .focused($isJSONEditorFocused)
+                .scrollDismissesKeyboard(.interactively)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .accessibilityIdentifier("manifestJSONEditor")
+                .frame(minHeight: 340, maxHeight: 560)
                 .scrollContentBackground(.hidden)
                 .padding(8)
                 .background(Color.black.opacity(0.45))
@@ -131,6 +146,24 @@ struct AppsListAndJSONView: View {
                 Text(err).font(.system(size: 12)).foregroundColor(GhostTheme.danger)
             }
 
+        }
+        .padding(16)
+        .ghostCard()
+    }
+
+    private var jsonEditorToolbar: some View {
+        VStack(spacing: 8) {
+            if isJSONEditorFocused {
+                HStack {
+                    Spacer()
+                    Button("إخفاء لوحة المفاتيح") {
+                        isJSONEditorFocused = false
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(GhostTheme.textPrimary)
+                    .accessibilityIdentifier("hideJSONKeyboard")
+                }
+            }
             HStack {
                 Button("تنسيق والتحقق") {
                     do {
@@ -143,28 +176,44 @@ struct AppsListAndJSONView: View {
                 }
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(GhostTheme.gold)
+                .accessibilityIdentifier("validateJSON")
 
                 Spacer()
 
-                Button("حفظ في GitHub") {
+                Button {
+                    guard !isSavingJSON else { return }
                     Task {
+                        isSavingJSON = true
+                        defer { isSavingJSON = false }
                         do {
+                            _ = try SourceManifestCoder.parse(jsonString: draftJSON)
                             editorError = nil
                             try await vm.saveRawJSON(draftJSON, commitMessage: commitMessage)
                         } catch {
                             editorError = error.localizedDescription
                         }
                     }
+                } label: {
+                    HStack(spacing: 6) {
+                        if isSavingJSON { ProgressView().tint(.black) }
+                        Text("حفظ في GitHub")
+                    }
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(GhostTheme.goldGradient)
+                    .clipShape(Capsule())
                 }
-                .font(.system(size: 13, weight: .heavy))
-                .foregroundColor(.black)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(GhostTheme.goldGradient)
-                .clipShape(Capsule())
+                .disabled(isSavingJSON)
+                .accessibilityIdentifier("saveJSON")
             }
         }
-        .padding(16)
-        .ghostCard()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(GhostTheme.cardTop)
+        .overlay(alignment: .top) {
+            Rectangle().fill(GhostTheme.violetGlow.opacity(0.45)).frame(height: 1)
+        }
     }
 }

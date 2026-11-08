@@ -13,7 +13,8 @@ final class SourceManifestTests: XCTestCase {
               "bundleIdentifier": "com.example.phoenix",
               "version": "1.2.0",
               "downloadURL": "https://example.com/phoenix.ipa",
-              "customAppField": 42
+              "customAppField": 42,
+              "versions": [{"version":"1.2.0","downloadURL":"https://example.com/phoenix.ipa","customVersionField":{"keep":true}}]
             }
           ]
         }
@@ -28,8 +29,8 @@ final class SourceManifestTests: XCTestCase {
             name: "Phoenix",
             bundleIdentifier: "com.example.phoenix",
             developerName: "",
-            version: "1.3.0",
-            buildVersion: "13",
+            version: "1.2.0",
+            buildVersion: "12",
             localizedDescription: "",
             downloadURL: "https://example.com/phoenix-1.3.0.ipa",
             iconURL: "",
@@ -39,5 +40,18 @@ final class SourceManifestTests: XCTestCase {
         XCTAssertFalse(updated.appliedDefaults.isEmpty)
         XCTAssertTrue(updated.jsonString.contains("customRootKey"))
         XCTAssertTrue(updated.jsonString.contains("customAppField"))
+        XCTAssertTrue(updated.jsonString.contains("customVersionField"))
+        let apps = updated.updated.rawRootObject["apps"] as? [[String: Any]]
+        let versions = apps?.first?["versions"] as? [[String: Any]]
+        let customVersion = versions?.first?["customVersionField"] as? [String: Any]
+        XCTAssertEqual(customVersion?["keep"] as? Bool, true)
+    }
+
+    func testMalformedJSONProducesHelpfulDiagnostic() {
+        XCTAssertThrowsError(try SourceManifestCoder.parse(jsonString: "{\n  \"apps\": [\n")) { error in
+            let message = error.localizedDescription
+            XCTAssertTrue(message.contains("JSON"))
+            XCTAssertGreaterThan(message.count, 20)
+        }
     }
 }

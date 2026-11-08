@@ -52,7 +52,7 @@ enum SourceManifestCoder {
         do {
             rawAny = try JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed])
         } catch {
-            throw SourceManifestError.malformedJSON(error.localizedDescription)
+            throw SourceManifestError.malformedJSON(jsonErrorDetail(error, data: data))
         }
 
         var rootDict: [String: Any]
@@ -79,10 +79,10 @@ enum SourceManifestCoder {
             let versions = obj["versions"] as? [[String: Any]]
             let latestVer = versions?.first
 
-            let directDesc = (obj["localizedDescription"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
-            let verDesc = (latestVer?["localizedDescription"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
-            let hasExplicit = !(directDesc ?? "").isEmpty || !(verDesc ?? "").isEmpty
-            let resolvedDesc = directDesc ?? verDesc ?? (obj["subtitle"] as? String) ?? ""
+            let directDesc = nonEmptyTrimmedString(obj["localizedDescription"])
+            let verDesc = nonEmptyTrimmedString(latestVer?["localizedDescription"])
+            let hasExplicit = directDesc != nil || verDesc != nil
+            let resolvedDesc = directDesc ?? verDesc ?? nonEmptyTrimmedString(obj["subtitle"]) ?? ""
 
             let version = (obj["version"] as? String) ?? (latestVer?["version"] as? String) ?? "1.0.0"
             let buildVersion = (obj["buildVersion"] as? String) ?? (latestVer?["buildVersion"] as? String) ?? version
@@ -166,6 +166,7 @@ enum SourceManifestCoder {
         }
 
         let nowISO = ISO8601DateFormatter().string(from: Date())
+        let existingVersions = entry["versions"] as? [[String: Any]]
         entry["name"] = name
         entry["bundleIdentifier"] = bundleIdentifier
         entry["developerName"] = finalDev
@@ -179,14 +180,15 @@ enum SourceManifestCoder {
             entry["iconURL"] = iconURL
         }
 
-        var versionRecord: [String: Any] = [
+        var versionRecord: [String: Any] = existingVersions?.first(where: { ($0["version"] as? String) == version }) ?? [:]
+        versionRecord.merge([
             "version": version,
             "buildVersion": buildVersion.isEmpty ? version : buildVersion,
             "date": nowISO,
             "localizedDescription": finalDesc,
             "downloadURL": downloadURL,
             "size": size
-        ]
+        ]) { _, newValue in newValue }
         if let minOSVersion, !minOSVersion.isEmpty {
             versionRecord["minOSVersion"] = minOSVersion
         }
@@ -240,5 +242,27 @@ enum SourceManifestCoder {
     static func serializePretty(_ dict: [String: Any]) throws -> String {
         let data = try JSONSerialization.data(withJSONObject: dict, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
         return (String(data: data, encoding: .utf8) ?? "{}") + "\n"
+    }
+
+    private static func nonEmptyTrimmedString(_ value: Any?) -> String? {
+        guard let text = value as? String else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private static func jsonErrorDetail(_ error: Error, data: Data) -> String {
+        let nsError = error as NSError
+        let detail = (nsError.userInfo["NSDebugDescription"] as? String) ?? error.localizedDescription
+        if let number = nsError.userInfo["NSJSONSerializationErrorIndex"] as? NSNumber {
+            let offset = min(max(number.intValue, 0), data.count)
+            let prefix = String(decoding: data.prefix(offset), as: UTF8.self)
+            let line = prefix.reduce(into: 1) { if $1 == "\n" { $0 += 1 } }
+            let column = prefix.split(separator: "\n", omittingEmptySubsequences: false).last.map { $0.count + 1 } ?? 1
+            return "السطر \(line)، العمود \(column): \(detail)"
+        }
+        if let range = detail.range(of: #"line\s+(\d+),\s*column\s+(\d+)"#, options: .regularExpression) {
+            return "\(detail[range]): \(detail)"
+        }
+        return detail
     }
 }
