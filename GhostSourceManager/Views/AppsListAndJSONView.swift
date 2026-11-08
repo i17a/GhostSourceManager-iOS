@@ -78,7 +78,7 @@ struct AppsListAndJSONView: View {
                 Text("محرر JSON الكامل").tag(true)
             }
             .pickerStyle(.segmented)
-            .onChange(of: showJSONEditor) { _, isJSON in
+            .onChange(of: showJSONEditor) { isJSON in
                 if isJSON { draftJSON = vm.rawJSONString }
             }
         }
