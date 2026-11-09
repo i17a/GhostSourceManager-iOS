@@ -26,7 +26,7 @@ SideSource تطبيق iOS مبني بـ Swift وSwiftUI لإدارة مصادر 
 
 ## البناء عبر GitHub Actions
 
-يبدأ `.github/workflows/build-ios.yml` يدويًا أو عند push إلى `main` أو إنشاء tag يبدأ بـ `v`. يشغّل اختبارات الوحدة والواجهة على محاكي iPhone 15 Pro وiPhone SE، ثم يبني التطبيق.
+يبدأ `.github/workflows/build-ios.yml` يدويًا أو عند push إلى `main` أو إنشاء tag يبدأ بـ `v`. يبني التطبيق مباشرةً دون تشغيل المحاكيات افتراضيًا. عند التشغيل اليدوي يمكن تفعيل الإدخال `run_simulator_tests` اختياريًا لتشغيل اختبارات الوحدة والواجهة على أجهزة iPhone المحاكية.
 
 - إذا أُضيفت أسرار توقيع Apple المطلوبة إلى GitHub Actions، يُرفع artifact موقّع يحتوي الملف `SideSource.ipa`.
 - دون أسرار التوقيع، يُحزم `GhostSourceManager.app` داخل `Payload/` ويُرفع artifact غير موقّع يحتوي `SideSource.ipa` جاهزًا للتوقيع عبر SideStore أو AltStore أو Feather أو LiveContainer.

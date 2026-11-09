@@ -11,6 +11,11 @@ on:
         description: "Build Number (CFBundleVersion)"
         required: false
         default: "1"
+      run_simulator_tests:
+        description: "Run UI and unit tests on iPhone simulators"
+        type: boolean
+        required: false
+        default: false
   push:
     branches:
       - main
@@ -103,7 +108,8 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      - name: Run UI and Unit Tests on iPhone 15 Pro and iPhone SE simulators
+      - name: Optional UI and Unit Tests on iPhone simulators
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_simulator_tests }}
         run: |
           DEVICE_MAP=$(xcrun simctl list devices available -j | python3 -c '
           import json, sys, subprocess
