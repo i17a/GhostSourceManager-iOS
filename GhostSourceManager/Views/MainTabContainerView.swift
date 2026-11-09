@@ -3,6 +3,7 @@ import UIKit
 
 struct MainTabContainerView: View {
     @EnvironmentObject private var vm: SourceManagerViewModel
+    @State private var keyboardVisible = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,7 +30,13 @@ struct MainTabContainerView: View {
         }
         .background(GhostTheme.background.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            customBottomBar
+            if !keyboardVisible { customBottomBar }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            keyboardVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            keyboardVisible = false
         }
         .sheet(isPresented: $vm.showLoginSheet) {
             TokenLoginView()

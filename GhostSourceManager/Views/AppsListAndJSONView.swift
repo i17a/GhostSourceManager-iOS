@@ -10,6 +10,7 @@ struct AppsListAndJSONView: View {
     @State private var appPendingDelete: SourceAppItem?
     @State private var isSavingJSON = false
     @FocusState private var isJSONEditorFocused: Bool
+    @FocusState private var isCommitMessageFocused: Bool
     @Environment(\.undoManager) private var undoManager
 
     var body: some View {
@@ -54,13 +55,6 @@ struct AppsListAndJSONView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if showJSONEditor, vm.manifest != nil { jsonSaveBar }
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("تم") { isJSONEditorFocused = false }
-                    .accessibilityIdentifier("doneJSONKeyboard")
-            }
         }
         .confirmationDialog("تأكيد حذف التطبيق", isPresented: Binding(
             get: { appPendingDelete != nil },
@@ -198,7 +192,7 @@ struct AppsListAndJSONView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .accessibilityIdentifier("jsonEditorToolbar")
+        .accessibilityElement(children: .contain)
     }
 
     private func jsonTool(_ title: String, icon: String, id: String, action: @escaping () -> Void) -> some View {
@@ -220,6 +214,18 @@ struct AppsListAndJSONView: View {
 
     private var jsonSaveBar: some View {
         VStack(spacing: 8) {
+            if isJSONEditorFocused || isCommitMessageFocused {
+                HStack {
+                    Spacer()
+                    Button("تم") {
+                        isJSONEditorFocused = false
+                        isCommitMessageFocused = false
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(GhostTheme.textPrimary)
+                    .accessibilityIdentifier("doneJSONKeyboard")
+                }
+            }
             if let err = editorError {
                 Text(err)
                     .font(.system(size: 12, weight: .semibold))
@@ -229,6 +235,7 @@ struct AppsListAndJSONView: View {
             }
             TextField("رسالة الحفظ إلى GitHub", text: $commitMessage)
                 .font(.system(size: 12))
+                .focused($isCommitMessageFocused)
                 .textInputAutocapitalization(.sentences)
                 .padding(10)
                 .background(Color.black.opacity(0.35))
