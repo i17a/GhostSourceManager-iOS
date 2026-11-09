@@ -61,7 +61,7 @@ struct MainTabContainerView: View {
             Spacer()
 
             VStack(spacing: 2) {
-                Text("Ghost Source Manager")
+                Text("SideSource")
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundColor(GhostTheme.textPrimary)
                 Text("إدارة مصادر التطبيقات بسهولة")
@@ -80,26 +80,41 @@ struct MainTabContainerView: View {
                     .frame(width: 42, height: 42)
                     .ghostCard()
             }
+            .accessibilityIdentifier("openLogin")
         }
     }
 
     private var customBottomBar: some View {
-        HStack(spacing: 0) {
-            tabItem(tab: .home, icon: "house", title: "الرئيسية")
-            tabItem(tab: .sources, icon: "folder.fill", title: "المصادر")
-            addIPATab
-            tabItem(tab: .apps, icon: "square.grid.2x2", title: "التطبيقات")
-            tabItem(tab: .reports, icon: "chart.bar", title: "التقارير")
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 64)
-        .background {
-            GhostTheme.cardTop
-                .overlay(alignment: .top) {
-                    Rectangle().fill(GhostTheme.violetGlow.opacity(0.45)).frame(height: 1)
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                SideSourceFloatingBarShape()
+                    .fill(.ultraThinMaterial)
+                    .overlay(SideSourceFloatingBarShape().fill(Color.black.opacity(0.66)))
+                    .overlay(SideSourceFloatingBarShape().stroke(Color.white.opacity(0.12), lineWidth: 1))
+                    .frame(height: 72)
+                    .padding(.top, 18)
+                    .shadow(color: .black.opacity(0.38), radius: 18, y: 8)
+
+                HStack(spacing: 0) {
+                    tabItem(tab: .home, icon: "house", title: "الرئيسية")
+                    tabItem(tab: .sources, icon: "folder.fill", title: "المصادر")
+                    Color.clear.frame(maxWidth: .infinity)
+                    tabItem(tab: .apps, icon: "square.grid.2x2", title: "التطبيقات")
+                    tabItem(tab: .reports, icon: "chart.bar", title: "التقارير")
                 }
-                .ignoresSafeArea(edges: .bottom)
+                .frame(maxWidth: .infinity)
+                .frame(height: 72)
+                .padding(.top, 18)
+                .environment(\.layoutDirection, .rightToLeft)
+
+                addIPATab
+                    .position(x: geometry.size.width / 2, y: 39)
+            }
+            .frame(height: 90, alignment: .top)
         }
+        .frame(height: 90)
+        .padding(.horizontal, 10)
+        .padding(.bottom, 6)
     }
 
     private var addIPATab: some View {
@@ -107,32 +122,32 @@ struct MainTabContainerView: View {
             vm.editingApp = nil
             vm.selectedTab = .addIPA
         } label: {
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [GhostTheme.violetGlow, Color(red: 0.25, green: 0.10, blue: 0.45)],
-                            center: .center,
-                            startRadius: 4,
-                            endRadius: 28
+            VStack(spacing: 2) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [GhostTheme.violetGlow, Color(red: 0.34, green: 0.12, blue: 0.56), Color(red: 0.12, green: 0.06, blue: 0.25)],
+                                center: .center,
+                                startRadius: 2,
+                                endRadius: 32
+                            )
                         )
-                    )
-                    .frame(width: 56, height: 56)
-                    .overlay(Circle().stroke(GhostTheme.violetGlow, lineWidth: 1.5))
-                    .shadow(color: GhostTheme.violetGlow.opacity(0.55), radius: 10)
-                Image(systemName: "plus")
-                    .font(.system(size: 25, weight: .bold))
-                    .foregroundColor(.white)
+                        .frame(width: 56, height: 56)
+                        .overlay(Circle().stroke(GhostTheme.gold.opacity(0.75), lineWidth: 1.2))
+                        .shadow(color: GhostTheme.violetGlow.opacity(0.7), radius: 13)
+                    Image(systemName: "plus")
+                        .font(.system(size: 25, weight: .medium))
+                        .foregroundColor(.white)
+                }
+                Text("إضافة IPA")
+                    .font(.system(size: 9, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .foregroundColor(vm.selectedTab == .addIPA ? GhostTheme.gold : GhostTheme.textSecondary)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 64)
+            .frame(width: 74, height: 72)
             .contentShape(Rectangle())
-            .overlay(alignment: .bottom) {
-                Capsule()
-                    .fill(vm.selectedTab == .addIPA ? GhostTheme.gold : .clear)
-                    .frame(width: 22, height: 2)
-                    .padding(.bottom, 1)
-            }
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("tab.addIPA")
@@ -143,24 +158,62 @@ struct MainTabContainerView: View {
         return Button {
             vm.selectedTab = tab
         } label: {
-            VStack(spacing: 3) {
+            VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 19, weight: .semibold))
                 Text(title)
                     .font(.system(size: 9, weight: .bold))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.75)
                 Capsule()
                     .fill(isSelected ? GhostTheme.gold : .clear)
-                    .frame(width: 22, height: 2)
+                    .frame(width: 24, height: 2.5)
             }
             .foregroundColor(isSelected ? GhostTheme.gold : GhostTheme.textSecondary)
             .frame(maxWidth: .infinity)
-            .frame(height: 64)
+            .frame(height: 72)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("tab.\(tab.accessibilityKey)")
+    }
+}
+
+struct SideSourceFloatingBarShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let radius: CGFloat = 28
+        let center = rect.midX
+        let shoulder = min(70, rect.width * 0.18)
+        let notchHalf = min(54, rect.width * 0.14)
+        var path = Path()
+
+        path.move(to: CGPoint(x: radius, y: 0))
+        path.addLine(to: CGPoint(x: center - shoulder, y: 0))
+        path.addCurve(
+            to: CGPoint(x: center - notchHalf, y: 15),
+            control1: CGPoint(x: center - shoulder + 10, y: 0),
+            control2: CGPoint(x: center - notchHalf - 8, y: 15)
+        )
+        path.addCurve(
+            to: CGPoint(x: center + notchHalf, y: 15),
+            control1: CGPoint(x: center - 24, y: 48),
+            control2: CGPoint(x: center + 24, y: 48)
+        )
+        path.addCurve(
+            to: CGPoint(x: center + shoulder, y: 0),
+            control1: CGPoint(x: center + notchHalf + 8, y: 15),
+            control2: CGPoint(x: center + shoulder - 10, y: 0)
+        )
+        path.addLine(to: CGPoint(x: rect.maxX - radius, y: 0))
+        path.addQuadCurve(to: CGPoint(x: rect.maxX, y: radius), control: CGPoint(x: rect.maxX, y: 0))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - radius))
+        path.addQuadCurve(to: CGPoint(x: rect.maxX - radius, y: rect.maxY), control: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: radius, y: rect.maxY))
+        path.addQuadCurve(to: CGPoint(x: 0, y: rect.maxY - radius), control: CGPoint(x: 0, y: rect.maxY))
+        path.addLine(to: CGPoint(x: 0, y: radius))
+        path.addQuadCurve(to: CGPoint(x: radius, y: 0), control: .zero)
+        path.closeSubpath()
+        return path
     }
 }
 

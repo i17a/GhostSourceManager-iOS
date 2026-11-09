@@ -5,7 +5,7 @@ struct AppsListAndJSONView: View {
     @EnvironmentObject private var vm: SourceManagerViewModel
     @State private var showJSONEditor = false
     @State private var draftJSON = ""
-    @State private var commitMessage = "Update source manifest via Ghost Source Manager"
+    @State private var commitMessage = "Update source manifest via SideSource"
     @State private var editorError: String?
     @State private var appPendingDelete: SourceAppItem?
     @State private var isSavingJSON = false

@@ -27,6 +27,11 @@ final class SourceManagerViewModel: ObservableObject {
     @Published private(set) var grantedScopes: [String] = []
     @Published var isAuthenticating: Bool = false
     @Published var authError: String?
+    @Published var isRequestingDeviceCode = false
+    @Published var isDeviceFlowPolling = false
+    @Published var deviceFlowCode: String?
+    @Published var deviceFlowURL: URL?
+    @Published var deviceFlowStatus: String?
 
     @Published var repositories: [GitHubRepo] = []
     @Published var isLoadingRepos: Bool = false
@@ -50,6 +55,7 @@ final class SourceManagerViewModel: ObservableObject {
     private let lastRepoKey = "ghost_last_repo_fullname"
     private let lastBranchKey = "ghost_last_branch"
     private let lastPathKey = "ghost_last_filepath"
+    private var deviceFlowTask: Task<Void, Never>?
 
     init() {
 #if DEBUG
@@ -65,7 +71,7 @@ final class SourceManagerViewModel: ObservableObject {
 #endif
         if let savedToken = KeychainService.readToken(), !savedToken.isEmpty {
             Task {
-                await authenticate(with: savedToken, saveToKeychain: false)
+                await restoreSavedAuthentication(savedToken)
             }
         }
     }
@@ -106,14 +112,97 @@ final class SourceManagerViewModel: ObservableObject {
             await refreshRepositories()
         } catch {
             authError = error.localizedDescription
-            if !saveToKeychain {
-                KeychainService.deleteToken()
-            }
         }
         isAuthenticating = false
     }
 
+    func startGitHubDeviceFlow() {
+        guard !isRequestingDeviceCode, !isDeviceFlowPolling else { return }
+        deviceFlowTask?.cancel()
+        authError = nil
+        deviceFlowCode = nil
+        deviceFlowURL = nil
+        deviceFlowStatus = "جارٍ طلب رمز آمن من GitHub…"
+        isRequestingDeviceCode = true
+
+        deviceFlowTask = Task { [weak self] in
+            guard let self else { return }
+            defer {
+                self.isRequestingDeviceCode = false
+                self.isDeviceFlowPolling = false
+                self.deviceFlowTask = nil
+            }
+            do {
+                let code = try await GitHubDeviceAuthService.requestDeviceCode()
+                guard !Task.isCancelled else { return }
+                self.deviceFlowCode = code.userCode
+                self.deviceFlowURL = code.verificationURI
+                self.deviceFlowStatus = "أدخل الرمز في صفحة GitHub. سنكتشف الموافقة تلقائيًا."
+                self.isRequestingDeviceCode = false
+                self.isDeviceFlowPolling = true
+
+                let grant = try await GitHubDeviceAuthService.pollForAccessToken(using: code) { status in
+                    self.deviceFlowStatus = status
+                }
+                guard !Task.isCancelled, let accessToken = grant.accessToken else {
+                    throw GitHubDeviceAuthError.invalidResponse
+                }
+                self.isDeviceFlowPolling = false
+                self.deviceFlowStatus = "تمت الموافقة؛ جارٍ التحقق من حساب GitHub وحفظ الدخول…"
+                await self.authenticate(with: accessToken, saveToKeychain: true)
+                if self.currentUser != nil {
+                    if let refreshToken = grant.refreshToken {
+                        try KeychainService.saveRefreshToken(refreshToken)
+                    } else {
+                        KeychainService.deleteRefreshToken()
+                    }
+                    self.deviceFlowStatus = nil
+                }
+            } catch is CancellationError {
+                self.deviceFlowStatus = nil
+            } catch {
+                self.authError = error.localizedDescription
+                self.deviceFlowStatus = nil
+            }
+        }
+    }
+
+    func cancelGitHubDeviceFlow() {
+        deviceFlowTask?.cancel()
+        deviceFlowTask = nil
+        isRequestingDeviceCode = false
+        isDeviceFlowPolling = false
+        deviceFlowCode = nil
+        deviceFlowURL = nil
+        deviceFlowStatus = nil
+    }
+
+    private func restoreSavedAuthentication(_ token: String) async {
+        await authenticate(with: token, saveToKeychain: false)
+        guard currentUser == nil else { return }
+        guard let refreshToken = KeychainService.readRefreshToken() else {
+            KeychainService.deleteToken()
+            return
+        }
+        do {
+            let grant = try await GitHubDeviceAuthService.refreshAccessToken(using: refreshToken)
+            guard let newAccessToken = grant.accessToken, !newAccessToken.isEmpty else {
+                throw GitHubDeviceAuthError.authorization(grant.errorDescription ?? grant.error ?? "رمز التجديد غير صالح")
+            }
+            try KeychainService.saveToken(newAccessToken)
+            if let newRefreshToken = grant.refreshToken {
+                try KeychainService.saveRefreshToken(newRefreshToken)
+            }
+            await authenticate(with: newAccessToken, saveToKeychain: false)
+            if currentUser == nil { KeychainService.deleteToken() }
+        } catch {
+            KeychainService.deleteToken()
+            authError = "انتهت جلسة GitHub؛ سجّل الدخول مرة أخرى. \(error.localizedDescription)"
+        }
+    }
+
     func signOut() {
+        cancelGitHubDeviceFlow()
         KeychainService.deleteToken()
         currentUser = nil
         grantedScopes = []
@@ -214,7 +303,7 @@ final class SourceManagerViewModel: ObservableObject {
                 path: selectedFilePath,
                 branch: selectedBranch,
                 data: Data(starter.utf8),
-                message: "Initialize \(selectedFilePath) via Ghost Source Manager",
+                message: "Initialize \(selectedFilePath) via SideSource",
                 sha: nil
             )
             currentFileSha = res.newSha
@@ -409,7 +498,7 @@ final class SourceManagerViewModel: ObservableObject {
                 appliedDefaults = upserted.appliedDefaults
                 try await saveRawJSON(
                     upserted.jsonString,
-                    commitMessage: "Publish \(name) v\(version) via Ghost Source Manager"
+                    commitMessage: "Publish \(name) v\(version) via SideSource"
                 )
             } catch {
                 if uploadToRelease && !finalDownloadURL.isEmpty {

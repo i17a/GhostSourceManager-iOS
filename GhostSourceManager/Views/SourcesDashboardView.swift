@@ -76,7 +76,7 @@ struct SourcesDashboardView: View {
                         .clipShape(Capsule())
                     }
                 } else {
-                    Text("مرحباً بك في\nGhost Source Manager")
+                    Text("مرحباً بك في\nSideSource")
                         .font(.system(size: 20, weight: .heavy))
                         .foregroundColor(.white)
                     Text("سجل دخولك باستخدام GitHub Token لإدارة مصادر التطبيقات ونشر التحديثات")
@@ -327,7 +327,7 @@ struct SourcesDashboardView: View {
 
     private var aboutContent: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Ghost Source Manager لنظام iOS")
+            Text("SideSource لنظام iOS")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundColor(.white)
             Text("مدير مصادر متكامل لـ AltStore و SideStore و LiveContainer يعمل مباشرة عبر GitHub API دون خوادم وسيطة.")

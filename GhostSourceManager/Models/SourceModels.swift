@@ -67,7 +67,7 @@ enum SourceManifestCoder {
                 }
             }
         } else if let arr = rawAny as? [[String: Any]] {
-            rootDict = ["name": "Ghost Source", "apps": arr]
+            rootDict = ["name": "SideSource", "apps": arr]
         } else {
             throw SourceManifestError.invalidRootStructure
         }
@@ -120,7 +120,7 @@ enum SourceManifestCoder {
         }
 
         return ParsedSourceManifest(
-            name: (rootDict["name"] as? String) ?? "Ghost Source",
+            name: (rootDict["name"] as? String) ?? "SideSource",
             identifier: (rootDict["identifier"] as? String) ?? "",
             subtitle: (rootDict["subtitle"] as? String) ?? "",
             appsKey: appsKey,
@@ -230,7 +230,7 @@ enum SourceManifestCoder {
         let obj: [String: Any] = [
             "name": "\(repoName) Source",
             "identifier": "com.\(owner.lowercased()).\(repoName.lowercased())",
-            "subtitle": "مصدر تطبيقات مدار بواسطة Ghost Source Manager",
+            "subtitle": "مصدر تطبيقات مدار بواسطة SideSource",
             "description": "مصدر متوافق مع AltStore و LiveContainer",
             "website": "https://github.com/\(owner)/\(repoName)",
             "apps": [],

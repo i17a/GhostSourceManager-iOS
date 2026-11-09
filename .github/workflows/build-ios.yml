@@ -1,4 +1,4 @@
-name: Build Ghost Source Manager iOS
+name: Build SideSource iOS
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   build-ios:
-    name: Build Xcode Project & Optional Signed IPA
+    name: Build SideSource & Optional Signed IPA
     runs-on: macos-latest
 
     steps:
@@ -74,7 +74,7 @@ jobs:
             echo "signed=true" >> "$GITHUB_OUTPUT"
           else
             echo "signed=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::بيانات التوقيع غير مضافة في GitHub Secrets؛ سيُبنى التطبيق ويُحزم كملف GhostSourceManager-unsigned.ipa غير موقّع للتوقيع الجانبي."
+            echo "::notice::بيانات التوقيع غير مضافة في GitHub Secrets؛ سيُبنى التطبيق ويُحزم كملف SideSource.ipa غير موقّع للتوقيع الجانبي."
           fi
 
       - name: Import Code Signing Certificate & Provisioning Profile
@@ -170,17 +170,17 @@ jobs:
           </plist>
           EOF
 
-          xcodebuild archive             -project GhostSourceManager.xcodeproj             -scheme GhostSourceManager             -configuration Release             -destination "generic/platform=iOS"             -archivePath "$RUNNER_TEMP/GhostSourceManager.xcarchive"             MARKETING_VERSION="${{ steps.ver.outputs.version }}"             CURRENT_PROJECT_VERSION="${{ steps.ver.outputs.build }}"             DEVELOPMENT_TEAM="${TEAM_ID}"
+          xcodebuild archive             -project GhostSourceManager.xcodeproj             -scheme GhostSourceManager             -configuration Release             -destination "generic/platform=iOS"             -archivePath "$RUNNER_TEMP/SideSource.xcarchive"             MARKETING_VERSION="${{ steps.ver.outputs.version }}"             CURRENT_PROJECT_VERSION="${{ steps.ver.outputs.build }}"             DEVELOPMENT_TEAM="${TEAM_ID}"
 
-          xcodebuild -exportArchive             -archivePath "$RUNNER_TEMP/GhostSourceManager.xcarchive"             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"             -exportPath "$RUNNER_TEMP/export"
+          xcodebuild -exportArchive             -archivePath "$RUNNER_TEMP/SideSource.xcarchive"             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"             -exportPath "$RUNNER_TEMP/export"
 
-          mv "$RUNNER_TEMP/export/GhostSourceManager.ipa"              "$RUNNER_TEMP/export/GhostSourceManager-v${{ steps.ver.outputs.version }}-b${{ steps.ver.outputs.build }}-signed.ipa"
+          mv "$RUNNER_TEMP/export/GhostSourceManager.ipa"              "$RUNNER_TEMP/export/SideSource.ipa"
 
       - name: Upload Signed IPA Artifact
         if: steps.check_signing.outputs.signed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: GhostSourceManager-Signed-IPA-v${{ steps.ver.outputs.version }}-b${{ steps.ver.outputs.build }}
+          name: SideSource-Signed-IPA-v${{ steps.ver.outputs.version }}-b${{ steps.ver.outputs.build }}
           path: ${{ runner.temp }}/export/*.ipa
           if-no-files-found: error
 
@@ -202,14 +202,14 @@ jobs:
             CODE_SIGN_IDENTITY=""
           test -d "$BUILD_DIR/GhostSourceManager.app"
           cp -R "$BUILD_DIR/GhostSourceManager.app" "$BUILD_DIR/Payload/"
-          (cd "$BUILD_DIR" && /usr/bin/zip -qry "$RUNNER_TEMP/GhostSourceManager-unsigned.ipa" Payload)
-          test -s "$RUNNER_TEMP/GhostSourceManager-unsigned.ipa"
+          (cd "$BUILD_DIR" && /usr/bin/zip -qry "$RUNNER_TEMP/SideSource.ipa" Payload)
+          test -s "$RUNNER_TEMP/SideSource.ipa"
       - name: Upload Unsigned IPA Artifact
         if: steps.check_signing.outputs.signed == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: GhostSourceManager-unsigned-IPA-v${{ steps.ver.outputs.version }}-b${{ steps.ver.outputs.build }}
-          path: ${{ runner.temp }}/GhostSourceManager-unsigned.ipa
+          name: SideSource-IPA-v${{ steps.ver.outputs.version }}-b${{ steps.ver.outputs.build }}
+          path: ${{ runner.temp }}/SideSource.ipa
           if-no-files-found: error
       - name: Clean Up Temporary Keychain
         if: always() && steps.check_signing.outputs.signed == 'true'
